@@ -1,11 +1,16 @@
 
 var scene = null;
 var camera = null;
+var controls = null;
 var light = null;
 var renderer = null;
 
 var width = 640;
 var height = 480;
+
+var pos_psi = 0.25 * Math.PI;
+var pos_theta = 0.25 * Math.PI;
+var pos_r = 15;
 
 //var cube = null;
 var elms = [];
@@ -29,10 +34,20 @@ function initialize(){
     //scene.background = new THREE.Color( 0xffffff );
 
     // カメラ
-    camera = new THREE.PerspectiveCamera( 60, width / height );     // 視野角, アスペクト比, near, far
-    camera.position.set(15, 15, 15);    // 位置
-    let angle = -0.75*Math.PI;
-    camera.up.set(Math.sin(angle), Math.cos(angle), 0); // 回転
+    let camera_width = 30;
+    camera = new THREE.OrthographicCamera(-camera_width/2, camera_width/2, camera_width*height/(2*width), -camera_width*height/(2*width));   // left, right, top, bottom, near, far
+    camera.position.set(
+        pos_r*Math.cos(pos_psi)*Math.cos(pos_theta),
+        pos_r*Math.cos(pos_psi)*Math.sin(pos_theta),
+        pos_r*Math.sin(pos_psi)
+    );
+    //let angle = -0.75*Math.PI;
+    //camera.up.set(Math.sin(angle), Math.cos(angle), 0); // 回転
+    camera.up.set(
+        -Math.cos(pos_psi+Math.PI)*Math.cos(pos_theta+Math.PI),
+        -Math.cos(pos_psi+Math.PI)*Math.sin(pos_theta+Math.PI),
+        -Math.sin(pos_psi+Math.PI)
+    ); // 
     camera.lookAt(new THREE.Vector3(0, 0, 0));  // カメラの向き
 
     // ライト
@@ -85,6 +100,7 @@ function add_elements(){
     scene.add( box );
     elms.push( box );
 
+    /*
     // ドーナッツ
     let geo2 = new THREE.TorusGeometry(2, 1, 30, 90);  // r, tube-r, radialSegments, tubalarSegments
     let material_lamber = new THREE.MeshLambertMaterial( { color: 0xff0000 } );
@@ -92,18 +108,33 @@ function add_elements(){
     donut.position.set(5, 5, 5);
     scene.add( donut );
     elms.push( donut );
-
+    */
 }
 
 // アニメーション定義
+var rot = 0;
 function animate() {
-    /*
-    for(let i=0; i<elms.length; i++){
-        elms[i].rotation.y += 0.01;
-    }
-    */
-    //e1.rotation.y += 0.01;
-    //camera.rotation.x += -0.001 * Math.PI;
+    let theta_speed = ((mouseX - width/2) / width) / 80 ;
+    pos_theta += theta_speed*Math.PI;
+    
+    camera.position.set(
+        pos_r*Math.cos(pos_psi)*Math.cos(pos_theta),
+        pos_r*Math.cos(pos_psi)*Math.sin(pos_theta),
+        pos_r*Math.sin(pos_psi)
+    );
+    camera.up.set(
+        -Math.cos(pos_psi+Math.PI)*Math.cos(pos_theta+Math.PI),
+        -Math.cos(pos_psi+Math.PI)*Math.sin(pos_theta+Math.PI),
+        -Math.sin(pos_psi+Math.PI)
+    );
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    
 	requestAnimationFrame( animate );
 	renderer.render( scene, camera );
 }
+
+// マウス座標はマウスが動いた時のみ取得できる
+var mouseX = 0;
+document.addEventListener('mousemove', e => {
+	mouseX = e.pageX;
+});
