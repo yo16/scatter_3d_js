@@ -8,7 +8,7 @@ var renderer = null;
 var width = 640;
 var height = 480;
 
-var pos_psi = 0.25 * Math.PI;
+var pos_psi = (1/6) * Math.PI;
 var pos_theta = 0.25 * Math.PI;
 var pos_r = 15;
 
@@ -36,19 +36,8 @@ function initialize(){
     // カメラ
     let camera_width = 30;
     camera = new THREE.OrthographicCamera(-camera_width/2, camera_width/2, camera_width*height/(2*width), -camera_width*height/(2*width));   // left, right, top, bottom, near, far
-    camera.position.set(
-        pos_r*Math.cos(pos_psi)*Math.cos(pos_theta),
-        pos_r*Math.cos(pos_psi)*Math.sin(pos_theta),
-        pos_r*Math.sin(pos_psi)
-    );
-    //let angle = -0.75*Math.PI;
-    //camera.up.set(Math.sin(angle), Math.cos(angle), 0); // 回転
-    camera.up.set(
-        -Math.cos(pos_psi+Math.PI)*Math.cos(pos_theta+Math.PI),
-        -Math.cos(pos_psi+Math.PI)*Math.sin(pos_theta+Math.PI),
-        -Math.sin(pos_psi+Math.PI)
-    ); // 
-    camera.lookAt(new THREE.Vector3(0, 0, 0));  // カメラの向き
+    // 位置を設定
+    set_camera_pos();
 
     // ライト
     // 環境光源
@@ -74,6 +63,7 @@ function add_basic_elements(){
     // 底面
     plane_geo = new THREE.PlaneGeometry(10, 10, 1, 1);  // width, height, widthSegments, heightSegments
     plane_mat = new THREE.MeshLambertMaterial( { color: 0x666666 } );
+    plane_mat.side = THREE.DoubleSide;  // 裏も見える
     /* 透過
     plane_mat.opacity = 0.2;
     plane_mat.transparent = true;   // 透過
@@ -116,25 +106,41 @@ var rot = 0;
 function animate() {
     let theta_speed = ((mouseX - width/2) / width) / 80 ;
     pos_theta += theta_speed*Math.PI;
+
+    let psi_speed = ((mouseY - height/2) / height) / 100;
+    pos_psi += psi_speed * Math.PI;
+    if (pos_psi>Math.PI/2){
+        pos_psi = Math.PI/2;
+    }else if (pos_psi<-Math.PI/2){
+        pos_psi = -Math.PI/2;
+    }
+
+    // カメラ位置を再計算
+    set_camera_pos();
     
+	requestAnimationFrame( animate );
+	renderer.render( scene, camera );
+}
+
+function set_camera_pos(){
     camera.position.set(
         pos_r*Math.cos(pos_psi)*Math.cos(pos_theta),
         pos_r*Math.cos(pos_psi)*Math.sin(pos_theta),
         pos_r*Math.sin(pos_psi)
     );
     camera.up.set(
-        -Math.cos(pos_psi+Math.PI)*Math.cos(pos_theta+Math.PI),
-        -Math.cos(pos_psi+Math.PI)*Math.sin(pos_theta+Math.PI),
-        -Math.sin(pos_psi+Math.PI)
+        Math.sin(pos_psi)*Math.cos(pos_theta+Math.PI),
+        Math.sin(pos_psi)*Math.sin(pos_theta+Math.PI),
+        Math.cos(pos_psi)
     );
     camera.lookAt(new THREE.Vector3(0, 0, 0));
-    
-	requestAnimationFrame( animate );
-	renderer.render( scene, camera );
+
 }
 
 // マウス座標はマウスが動いた時のみ取得できる
 var mouseX = 0;
+var mouseY = 0;
 document.addEventListener('mousemove', e => {
 	mouseX = e.pageX;
+    mouseY = e.pageY;
 });
