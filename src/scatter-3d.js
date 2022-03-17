@@ -123,15 +123,17 @@ function animate() {
 }
 
 function set_camera_pos(){
+    let cos_psi = Math.cos(pos_psi);
+    let sin_psi = Math.sin(pos_psi);
     camera.position.set(
-        pos_r*Math.cos(pos_psi)*Math.cos(pos_theta),
-        pos_r*Math.cos(pos_psi)*Math.sin(pos_theta),
-        pos_r*Math.sin(pos_psi)
+        pos_r*cos_psi*Math.cos(pos_theta),
+        pos_r*cos_psi*Math.sin(pos_theta),
+        pos_r*sin_psi
     );
     camera.up.set(
-        Math.sin(pos_psi)*Math.cos(pos_theta+Math.PI),
-        Math.sin(pos_psi)*Math.sin(pos_theta+Math.PI),
-        Math.cos(pos_psi)
+        sin_psi*Math.cos(pos_theta+Math.PI),
+        sin_psi*Math.sin(pos_theta+Math.PI),
+        cos_psi
     );
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
