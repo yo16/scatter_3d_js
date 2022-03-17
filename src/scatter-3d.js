@@ -31,6 +31,8 @@ function initialize(){
     // カメラ
     camera = new THREE.PerspectiveCamera( 60, width / height );     // 視野角, アスペクト比, near, far
     camera.position.set(15, 15, 15);    // 位置
+    let angle = -0.75*Math.PI;
+    camera.up.set(Math.sin(angle), Math.cos(angle), 0); // 回転
     camera.lookAt(new THREE.Vector3(0, 0, 0));  // カメラの向き
 
     // ライト
@@ -63,8 +65,8 @@ function add_basic_elements(){
     plane_mat.depthTest = false;    // 陰面処理
     */
     plane = new THREE.Mesh( plane_geo, plane_mat );
-    plane.position.set(5, 0, 5);
-    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.set(5, 5, 0);
+    //plane.rotation.x = -0.5 * Math.PI;
     scene.add(plane);
 
     // 軸    
@@ -101,6 +103,7 @@ function animate() {
     }
     */
     //e1.rotation.y += 0.01;
+    //camera.rotation.x += -0.001 * Math.PI;
 	requestAnimationFrame( animate );
 	renderer.render( scene, camera );
 }
