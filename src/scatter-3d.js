@@ -17,18 +17,17 @@ var elms = [];
 
 function draw_three(){
     // 初期化
-    initialize();
+    initialize("cvs_scatter");
 
     // 基本要素を追加
     add_basic_elements();
 
     // 要素追加
     add_elements();
-
 }
 
 // 初期化
-function initialize(){
+function initialize(elm_id){
     // シーン
     scene = new THREE.Scene();
     //scene.background = new THREE.Color( 0xffffff );
@@ -50,7 +49,7 @@ function initialize(){
 
     // レンダラーを設定
     renderer = new THREE.WebGLRenderer({
-        canvas: document.querySelector("#cvs_scatter")
+        canvas: document.querySelector("#"+elm_id)
     });
     renderer.setSize( width, height );
     renderer.setPixelRatio(window.devicePixelRatio);
