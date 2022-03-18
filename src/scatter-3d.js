@@ -92,12 +92,10 @@ function scatter_3d(canvas_id, data){
         plane_mat.depthTest = false;    // 陰面処理
         */
         plane = new THREE.Mesh( plane_geo, plane_mat );
-        plane.position.set(box_size/2, box_size/2, 0);
-        //plane.rotation.x = -0.5 * Math.PI;
         scene.add(plane);
 
         // 軸    
-        const axes = new THREE.AxesHelper(box_size);
+        const axes = new THREE.AxesHelper(box_size/2);
         scene.add(axes);
     }
 
