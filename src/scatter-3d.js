@@ -10,6 +10,8 @@ var height = 480;
 
 var pos_psi = (1/6) * Math.PI;
 var pos_theta = 0.25 * Math.PI;
+var target_psi = pos_psi;
+var target_theta = pos_theta;
 var pos_r = 15;
 
 //var cube = null;
@@ -106,20 +108,9 @@ function add_elements(){
 }
 
 // アニメーション定義
-var rot = 0;
 function animate() {
-    /*
-    let theta_speed = ((mouseX - width/2) / width) / 80 ;
-    pos_theta += theta_speed*Math.PI;
-
-    let psi_speed = ((mouseY - height/2) / height) / 100;
-    pos_psi += psi_speed * Math.PI;
-    if (pos_psi>Math.PI/2){
-        pos_psi = Math.PI/2;
-    }else if (pos_psi<-Math.PI/2){
-        pos_psi = -Math.PI/2;
-    }
-    */
+    pos_psi += (target_psi - pos_psi)*0.3;
+    pos_theta += (target_theta - pos_theta)*0.3;
 
     // カメラ位置を再計算
     set_camera_pos();
@@ -145,16 +136,6 @@ function set_camera_pos(){
 
 }
 
-/*
-// マウス座標はマウスが動いた時のみ取得できる
-var mouseX = 0;
-var mouseY = 0;
-document.addEventListener('mousemove', e => {
-	mouseX = e.pageX;
-    mouseY = e.pageY;
-});
-*/
-
 
 function regist_drag_event(elm_id){
     let cvs = document.querySelector("#"+elm_id);
@@ -170,10 +151,10 @@ function regist_drag_event(elm_id){
         // 移動処理
         function moveTo(pos_x, pos_y){
             let diff_x = start_x - pos_x;
-            pos_theta = start_pos_theta + diff_x*0.005;
+            target_theta = start_pos_theta + diff_x*0.005;
 
             let diff_y = pos_y - start_y;
-            pos_psi = start_pos_psi + diff_y*0.005;
+            target_psi = start_pos_psi + diff_y*0.005;
         }
 
         // ドラッグ中の移動
