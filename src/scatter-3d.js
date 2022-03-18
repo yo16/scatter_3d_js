@@ -16,14 +16,19 @@ var pos_r = 15;
 var elms = [];
 
 function draw_three(){
+    let elm_id = "cvs_scatter"; // #なし
+
     // 初期化
-    initialize("cvs_scatter");
+    initialize(elm_id);
 
     // 基本要素を追加
     add_basic_elements();
 
     // 要素追加
     add_elements();
+
+    // イベントリスナー登録
+    regist_drag_event(elm_id);
 }
 
 // 初期化
@@ -145,3 +150,10 @@ document.addEventListener('mousemove', e => {
 	mouseX = e.pageX;
     mouseY = e.pageY;
 });
+
+
+function regist_drag_event(elm_id){
+    let cvs = document.getElementById("#"+elm_id);
+
+    
+}
