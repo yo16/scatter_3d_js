@@ -7,10 +7,19 @@
 	<script type="text/javascript" src="./js/three.min.js"></script>
 	<script type="text/javascript" src="../src/scatter-3d.js"></script>
 	<script type="text/javascript">
-	var data = [];
+	var data = [
+		[0,0,0],
+		[0,10,0],
+		[10,0,0],
+		[10,10,0],
+		[0,0,10],
+		[0,10,10],
+		[10,0,10],
+		[10,10,10]
+	];
 
 	document.addEventListener("DOMContentLoaded", function(event){
-		scatter_3d();
+		scatter_3d("cvs_scatter", data);
 	});
 	</script>
 </head>

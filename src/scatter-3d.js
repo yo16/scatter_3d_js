@@ -4,38 +4,38 @@ Copyright (c) 2022 yo16
 Released under the MIT license
 */
 
-function scatter_3d(){
+function scatter_3d(canvas_id, data){
+    // 描画するCanvas
+    const cvs = document.querySelector("#"+canvas_id);
+    const cvs_rect = cvs.getBoundingClientRect();
 
+    // three.jsのオブジェクト
     var scene = null;
     var camera = null;
-    var controls = null;
     var light = null;
     var renderer = null;
+    var elms = [];
 
-    var width = 640;
-    var height = 480;
-
+    // 位置計算用の変数
     var pos_psi = (1/6) * Math.PI;
     var pos_theta = 0.25 * Math.PI;
     var target_psi = pos_psi;
     var target_theta = pos_theta;
     var pos_r = 15;
 
-    var elms = [];
 
-    function draw_three(){
-        let elm_id = "cvs_scatter"; // #なし
-
+    // メイン処理
+    function main(elm_id, data){
         // 初期化
-        initialize(elm_id);
+        initialize_threejs(elm_id);
 
         // 基本要素を追加
         add_basic_elements();
 
         // 要素追加
-        add_elements();
+        add_elements(data);
 
-        // イベントリスナー登録
+        // ドラッグイベントリスナー登録
         regist_drag_event(elm_id);
 
         // アニメーション開始
@@ -43,15 +43,20 @@ function scatter_3d(){
     }
 
 
-    // 初期化
-    function initialize(elm_id){
+    // Three.js 初期化
+    function initialize_threejs(elm_id){
         // シーン
         scene = new THREE.Scene();
         //scene.background = new THREE.Color( 0xffffff );
 
         // カメラ
         let camera_width = 30;
-        camera = new THREE.OrthographicCamera(-camera_width/2, camera_width/2, camera_width*height/(2*width), -camera_width*height/(2*width));   // left, right, top, bottom, near, far
+        camera = new THREE.OrthographicCamera(
+            -camera_width/2,
+            camera_width/2,
+            camera_width*cvs_rect.height/(2*cvs_rect.width),
+            -camera_width*cvs_rect.height/(2*cvs_rect.width)
+        );   // left, right, top, bottom, near, far
         // 位置を設定
         set_camera_pos();
 
@@ -66,9 +71,9 @@ function scatter_3d(){
 
         // レンダラーを設定
         renderer = new THREE.WebGLRenderer({
-            canvas: document.querySelector("#"+elm_id)
+            canvas: cvs
         });
-        renderer.setSize( width, height );
+        renderer.setSize( cvs_rect.width, cvs_rect.height );
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild( renderer.domElement );
     }
@@ -97,7 +102,7 @@ function scatter_3d(){
 
 
     // 要素を追加
-    function add_elements(){
+    function add_elements(data){
         // box
         let geo1 = new THREE.BoxGeometry(1, 1, 1);  // x-width, y-width, z-width
         let material_basic = new THREE.MeshLambertMaterial( { color: 0x00aa00 } );
@@ -121,6 +126,7 @@ function scatter_3d(){
     }
 
 
+    // カメラの位置を計算
     function set_camera_pos(){
         let cos_psi = Math.cos(pos_psi);
         let sin_psi = Math.sin(pos_psi);
@@ -139,10 +145,8 @@ function scatter_3d(){
     }
 
 
-    function regist_drag_event(elm_id){
-        let cvs = document.querySelector("#"+elm_id);
-        let cvs_rect = cvs.getBoundingClientRect();
-        
+    // ドラッグイベント
+    function regist_drag_event(){
         cvs.onmousedown = function(event){
             let start_x = event.offsetX;
             let start_y = event.offsetY;
@@ -185,5 +189,6 @@ function scatter_3d(){
         };
     }
 
-    draw_three();
+    // 処理開始
+    main(canvas_id, data);
 }
