@@ -14,7 +14,6 @@ var target_psi = pos_psi;
 var target_theta = pos_theta;
 var pos_r = 15;
 
-//var cube = null;
 var elms = [];
 
 function draw_three(){
@@ -32,6 +31,7 @@ function draw_three(){
     // イベントリスナー登録
     regist_drag_event(elm_id);
 }
+
 
 // 初期化
 function initialize(elm_id){
@@ -95,17 +95,8 @@ function add_elements(){
     box.position.set(0.5, 0.5, 0.5);
     scene.add( box );
     elms.push( box );
-
-    /*
-    // ドーナッツ
-    let geo2 = new THREE.TorusGeometry(2, 1, 30, 90);  // r, tube-r, radialSegments, tubalarSegments
-    let material_lamber = new THREE.MeshLambertMaterial( { color: 0xff0000 } );
-    donut = new THREE.Mesh( geo2, material_lamber );
-    donut.position.set(5, 5, 5);
-    scene.add( donut );
-    elms.push( donut );
-    */
 }
+
 
 // アニメーション定義
 function animate() {
@@ -118,6 +109,7 @@ function animate() {
 	requestAnimationFrame( animate );
 	renderer.render( scene, camera );
 }
+
 
 function set_camera_pos(){
     let cos_psi = Math.cos(pos_psi);
