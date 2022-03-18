@@ -17,11 +17,12 @@ function scatter_3d(canvas_id, data){
     var elms = [];
 
     // 位置計算用の変数
+    const box_size = 100;
     var pos_psi = (1/6) * Math.PI;
     var pos_theta = 0.25 * Math.PI;
     var target_psi = pos_psi;
     var target_theta = pos_theta;
-    var pos_r = 15;
+    var pos_r = box_size*1.5;
 
 
     // メイン処理
@@ -50,7 +51,7 @@ function scatter_3d(canvas_id, data){
         //scene.background = new THREE.Color( 0xffffff );
 
         // カメラ
-        let camera_width = 30;
+        let camera_width = box_size*3;
         camera = new THREE.OrthographicCamera(
             -camera_width/2,
             camera_width/2,
@@ -82,7 +83,7 @@ function scatter_3d(canvas_id, data){
     // 基本要素を追加
     function add_basic_elements(){
         // 底面
-        plane_geo = new THREE.PlaneGeometry(10, 10, 1, 1);  // width, height, widthSegments, heightSegments
+        plane_geo = new THREE.PlaneGeometry(box_size, box_size, 1, 1);  // width, height, widthSegments, heightSegments
         plane_mat = new THREE.MeshLambertMaterial( { color: 0x666666 } );
         plane_mat.side = THREE.DoubleSide;  // 裏も見える
         /* 透過
@@ -91,12 +92,12 @@ function scatter_3d(canvas_id, data){
         plane_mat.depthTest = false;    // 陰面処理
         */
         plane = new THREE.Mesh( plane_geo, plane_mat );
-        plane.position.set(5, 5, 0);
+        plane.position.set(box_size/2, box_size/2, 0);
         //plane.rotation.x = -0.5 * Math.PI;
         scene.add(plane);
 
         // 軸    
-        const axes = new THREE.AxesHelper(12);
+        const axes = new THREE.AxesHelper(box_size);
         scene.add(axes);
     }
 
@@ -104,10 +105,10 @@ function scatter_3d(canvas_id, data){
     // 要素を追加
     function add_elements(data){
         // box
-        let geo1 = new THREE.BoxGeometry(1, 1, 1);  // x-width, y-width, z-width
+        let geo1 = new THREE.BoxGeometry(box_size/10, box_size/10, box_size/10);  // x-width, y-width, z-width
         let material_basic = new THREE.MeshLambertMaterial( { color: 0x00aa00 } );
         box = new THREE.Mesh( geo1, material_basic );
-        box.position.set(0.5, 0.5, 0.5);
+        box.position.set(box_size/20, box_size/20, box_size/20);
         scene.add( box );
         elms.push( box );
     }
