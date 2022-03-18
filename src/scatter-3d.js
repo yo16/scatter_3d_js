@@ -30,6 +30,9 @@ function draw_three(){
 
     // イベントリスナー登録
     regist_drag_event(elm_id);
+
+    // アニメーション開始
+    animate();
 }
 
 
