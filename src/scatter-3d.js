@@ -108,6 +108,7 @@ function add_elements(){
 // アニメーション定義
 var rot = 0;
 function animate() {
+    /*
     let theta_speed = ((mouseX - width/2) / width) / 80 ;
     pos_theta += theta_speed*Math.PI;
 
@@ -118,6 +119,7 @@ function animate() {
     }else if (pos_psi<-Math.PI/2){
         pos_psi = -Math.PI/2;
     }
+    */
 
     // カメラ位置を再計算
     set_camera_pos();
@@ -143,6 +145,7 @@ function set_camera_pos(){
 
 }
 
+/*
 // マウス座標はマウスが動いた時のみ取得できる
 var mouseX = 0;
 var mouseY = 0;
@@ -150,10 +153,51 @@ document.addEventListener('mousemove', e => {
 	mouseX = e.pageX;
     mouseY = e.pageY;
 });
+*/
 
 
 function regist_drag_event(elm_id){
-    let cvs = document.getElementById("#"+elm_id);
-
+    let cvs = document.querySelector("#"+elm_id);
+    let cvs_rect = cvs.getBoundingClientRect();
     
+    cvs.onmousedown = function(event){
+        let start_x = event.offsetX;
+        let start_y = event.offsetY;
+
+        let start_pos_theta = pos_theta;
+        let start_pos_psi = pos_psi;
+
+        // 移動処理
+        function moveTo(pos_x, pos_y){
+            let diff_x = start_x - pos_x;
+            pos_theta = start_pos_theta + diff_x*0.005;
+
+            let diff_y = pos_y - start_y;
+            pos_psi = start_pos_psi + diff_y*0.005;
+        }
+
+        // ドラッグ中の移動
+        function onMouseMove(event){
+            if(
+                (event.clientX<cvs_rect.left) || (cvs_rect.right<event.clientX) ||
+                (event.clientY<cvs_rect.top) || (cvs_rect.bottom<event.clientY)
+            ){
+                endDragging();
+                return;
+            }
+            moveTo(event.offsetX, event.offsetY);
+        }
+
+        // ドラッグ終了
+        function endDragging(){
+            document.removeEventListener('mousemove', onMouseMove);
+            cvs.onmouseup = null;
+        }
+
+        // イベントリスナー
+        document.addEventListener('mousemove', onMouseMove);
+        cvs.onmouseup = function(){
+            endDragging();
+        }
+    };
 }
