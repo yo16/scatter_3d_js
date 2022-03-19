@@ -18,6 +18,7 @@ function scatter_3d(canvas_id, data){
 
     // 位置計算用の変数
     const box_size = 100;
+    const box_padding = 10;
     var pos_psi = (1/6) * Math.PI;
     var pos_theta = 0.25 * Math.PI;
     var target_psi = pos_psi;
@@ -107,38 +108,81 @@ function scatter_3d(canvas_id, data){
 
     // 基本要素を追加
     function add_basic_elements(){
+        // padding込みのサイズ
+        const box_size_p = box_size + box_padding*2;
+        const box_size_p_h = box_size_p/2;  // half
+
         // 背景面
-        let plane_geo_xy = new THREE.PlaneGeometry(box_size, box_size, 1, 1);
-        let plane_geo_yz = new THREE.PlaneGeometry(box_size, box_size, 1, 1);
-        let plane_geo_zx = new THREE.PlaneGeometry(box_size, box_size, 1, 1);
-        let plane_mat = new THREE.MeshLambertMaterial( { color: 0x666666 } );
+        let plane_geo_xy = new THREE.PlaneGeometry(box_size_p, box_size_p, 1, 1);
+        let plane_geo_yz = new THREE.PlaneGeometry(box_size_p, box_size_p, 1, 1);
+        let plane_geo_zx = new THREE.PlaneGeometry(box_size_p, box_size_p, 1, 1);
+        let plane_mat = new THREE.MeshLambertMaterial( { color: 0x999999 } );
         plane_mat.side = THREE.DoubleSide;  // 裏も見える
         plane_mat.transparent = true;   // 透過
-        plane_mat.opacity = 0.2;
+        plane_mat.opacity = 0.1;
         plane_mat.depthTest = false;    // 陰面処理
         let plane_xy = new THREE.Mesh( plane_geo_xy, plane_mat );
-        plane_xy.position.z -= box_size/2;
+        plane_xy.position.z -= box_size_p/2;
         let plane_yz = new THREE.Mesh( plane_geo_yz, plane_mat );
         plane_yz.rotation.x += Math.PI/2;
-        plane_yz.position.y -= box_size/2;
+        plane_yz.position.y -= box_size_p/2;
         let plane_zx = new THREE.Mesh( plane_geo_zx, plane_mat );
         plane_zx.rotation.y += Math.PI/2;
-        plane_zx.position.x -= box_size/2;
+        plane_zx.position.x -= box_size_p/2;
         scene.add(plane_xy);
         scene.add(plane_yz);
         scene.add(plane_zx);
 
-        // 軸    
-        const axis = new THREE.AxesHelper(box_size/2);
-        scene.add(axis);
+        // 背景面上の線
+        let plane_line_mat = new THREE.LineBasicMaterial( { color: 0x6666cc } );
+        plane_line_mat.transparent = true;   // 透過
+        plane_line_mat.opacity = 0.2;
+        let line_over_len = 2;
+        // グラフの座標値をthree.js内の座標値へ変換
+        function val_to_pos(v){
+            let v_width = data_summary['max'] - data_summary['min'];
+            let v_rate = (v-data_summary['min'])/v_width;
+            let t_min = -box_size/2;
+            let t_width = box_size;
+            return t_min + t_width * v_rate;
+        }
+        for(let i=data_summary['min']; i<=data_summary['max']; i+=data_summary['axis_notch']){
+            const vtp_i = val_to_pos(i);
+            // xy->yz
+            const p1 = [
+                new THREE.Vector3( box_size_p_h+line_over_len, vtp_i, -box_size_p_h),
+                new THREE.Vector3(-box_size_p_h              , vtp_i, -box_size_p_h),
+                new THREE.Vector3(-box_size_p_h              , vtp_i,  box_size_p_h)
+            ];
+            const g1 = new THREE.BufferGeometry().setFromPoints(p1);
+            const l1 = new THREE.Line(g1, plane_line_mat);
+            scene.add(l1);
+            // xy->zx
+            const p2 = [
+                new THREE.Vector3(vtp_i,  box_size_p_h+line_over_len, -box_size_p_h),
+                new THREE.Vector3(vtp_i, -box_size_p_h              , -box_size_p_h),
+                new THREE.Vector3(vtp_i, -box_size_p_h              ,  box_size_p_h)
+            ];
+            const g2 = new THREE.BufferGeometry().setFromPoints(p2);
+            const l2 = new THREE.Line(g2, plane_line_mat);
+            scene.add(l2);
+            // zx->yz
+            const p3 = [
+                new THREE.Vector3( box_size_p_h+line_over_len, -box_size_p_h, vtp_i),
+                new THREE.Vector3(-box_size_p_h              , -box_size_p_h, vtp_i),
+                new THREE.Vector3(-box_size_p_h              ,  box_size_p_h, vtp_i)
+            ];
+            const g3 = new THREE.BufferGeometry().setFromPoints(p3);
+            const l3 = new THREE.Line(g3, plane_line_mat);
+            scene.add(l3);
+        }
 
         // 数値軸
-        const axis_p = box_size/2;
         const points = [
-            new THREE.Vector3(axis_p,-axis_p,axis_p),
-            new THREE.Vector3(axis_p,-axis_p,-axis_p),
-            new THREE.Vector3(axis_p, axis_p, -axis_p),
-            new THREE.Vector3(-axis_p, axis_p, -axis_p)
+            new THREE.Vector3(box_size_p_h,-box_size_p_h,box_size_p_h),
+            new THREE.Vector3(box_size_p_h,-box_size_p_h,-box_size_p_h),
+            new THREE.Vector3(box_size_p_h, box_size_p_h, -box_size_p_h),
+            new THREE.Vector3(-box_size_p_h, box_size_p_h, -box_size_p_h)
         ];
         let line_geo = new THREE.BufferGeometry()
             .setFromPoints(points);
@@ -148,6 +192,9 @@ function scatter_3d(canvas_id, data){
         const line = new THREE.Line(line_geo, axis_mat);
         scene.add(line);
 
+        // 軸    
+        const axis = new THREE.AxesHelper(box_size/2);
+        scene.add(axis);
     }
 
 
