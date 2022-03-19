@@ -73,7 +73,7 @@ function scatter_3d(canvas_id, data){
     function initialize_threejs(elm_id){
         // シーン
         scene = new THREE.Scene();
-        //scene.background = new THREE.Color( 0xffffff );
+        scene.background = new THREE.Color( 0xffffff );
 
         // カメラ
         let camera_width = box_size*3;
