@@ -62,6 +62,9 @@ function scatter_3d(canvas_id, data){
         data_summary['min'] = Math.min(data_summary['x_min'], data_summary['y_min'], data_summary['z_min']);
         data_summary['max'] = Math.max(data_summary['x_max'], data_summary['y_max'], data_summary['z_max']);
 
+        let notch = get_div_notch(data_summary['min'], data_summary['max']);
+        data_summary['axis_notch'] = notch;
+
         console.log(data_summary);
     }
 
