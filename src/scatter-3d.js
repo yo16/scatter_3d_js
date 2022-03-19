@@ -107,21 +107,47 @@ function scatter_3d(canvas_id, data){
 
     // 基本要素を追加
     function add_basic_elements(){
-        // 底面
-        plane_geo = new THREE.PlaneGeometry(box_size, box_size, 1, 1);  // width, height, widthSegments, heightSegments
-        plane_mat = new THREE.MeshLambertMaterial( { color: 0x666666 } );
+        // 背景面
+        let plane_geo_xy = new THREE.PlaneGeometry(box_size, box_size, 1, 1);
+        let plane_geo_yz = new THREE.PlaneGeometry(box_size, box_size, 1, 1);
+        let plane_geo_zx = new THREE.PlaneGeometry(box_size, box_size, 1, 1);
+        let plane_mat = new THREE.MeshLambertMaterial( { color: 0x666666 } );
         plane_mat.side = THREE.DoubleSide;  // 裏も見える
-        /* 透過
-        plane_mat.opacity = 0.2;
         plane_mat.transparent = true;   // 透過
+        plane_mat.opacity = 0.2;
         plane_mat.depthTest = false;    // 陰面処理
-        */
-        plane = new THREE.Mesh( plane_geo, plane_mat );
-        scene.add(plane);
+        let plane_xy = new THREE.Mesh( plane_geo_xy, plane_mat );
+        plane_xy.position.z -= box_size/2;
+        let plane_yz = new THREE.Mesh( plane_geo_yz, plane_mat );
+        plane_yz.rotation.x += Math.PI/2;
+        plane_yz.position.y -= box_size/2;
+        let plane_zx = new THREE.Mesh( plane_geo_zx, plane_mat );
+        plane_zx.rotation.y += Math.PI/2;
+        plane_zx.position.x -= box_size/2;
+        scene.add(plane_xy);
+        scene.add(plane_yz);
+        scene.add(plane_zx);
 
         // 軸    
-        const axes = new THREE.AxesHelper(box_size/2);
-        scene.add(axes);
+        const axis = new THREE.AxesHelper(box_size/2);
+        scene.add(axis);
+
+        // 数値軸
+        const axis_p = box_size/2;
+        const points = [
+            new THREE.Vector3(axis_p,-axis_p,axis_p),
+            new THREE.Vector3(axis_p,-axis_p,-axis_p),
+            new THREE.Vector3(axis_p, axis_p, -axis_p),
+            new THREE.Vector3(-axis_p, axis_p, -axis_p)
+        ];
+        let line_geo = new THREE.BufferGeometry()
+            .setFromPoints(points);
+        const axis_mat = new THREE.LineBasicMaterial({
+            color: 0x666666
+        });
+        const line = new THREE.Line(line_geo, axis_mat);
+        scene.add(line);
+
     }
 
 
