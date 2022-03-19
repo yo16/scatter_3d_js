@@ -116,11 +116,13 @@ function scatter_3d(canvas_id, data){
         let plane_geo_xy = new THREE.PlaneGeometry(box_size_p, box_size_p, 1, 1);
         let plane_geo_yz = new THREE.PlaneGeometry(box_size_p, box_size_p, 1, 1);
         let plane_geo_zx = new THREE.PlaneGeometry(box_size_p, box_size_p, 1, 1);
-        let plane_mat = new THREE.MeshLambertMaterial( { color: 0x999999 } );
-        plane_mat.side = THREE.DoubleSide;  // 裏も見える
-        plane_mat.transparent = true;   // 透過
-        plane_mat.opacity = 0.1;
-        plane_mat.depthTest = false;    // 陰面処理
+        let plane_mat = new THREE.MeshLambertMaterial( {
+            color: 0x999999,
+            side: THREE.DoubleSide, // 裏も見える
+            transparent: true,      // 透過
+            opacity: 0.1,
+            depthTest: false        // 陰面処理
+        } );
         let plane_xy = new THREE.Mesh( plane_geo_xy, plane_mat );
         plane_xy.position.z -= box_size_p/2;
         let plane_yz = new THREE.Mesh( plane_geo_yz, plane_mat );
@@ -134,9 +136,11 @@ function scatter_3d(canvas_id, data){
         scene.add(plane_zx);
 
         // 背景面上の線
-        let plane_line_mat = new THREE.LineBasicMaterial( { color: 0x6666cc } );
-        plane_line_mat.transparent = true;   // 透過
-        plane_line_mat.opacity = 0.2;
+        let plane_line_mat = new THREE.LineBasicMaterial( {
+            color: 0x6666cc,
+            transparent: true,  // 透過
+            opacity: 0.2
+        } );
         let line_over_len = 2;
         // グラフの座標値をthree.js内の座標値へ変換
         function val_to_pos(v){
