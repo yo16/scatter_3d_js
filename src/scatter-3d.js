@@ -24,10 +24,16 @@ function scatter_3d(canvas_id, data){
     var target_theta = pos_theta;
     var pos_r = box_size*1.5;
 
+    // データの情報
+    var data_summary = {};
+
 
     // メイン処理
     function main(elm_id, data){
-        // 初期化
+        // データを初期分析
+        initialize_data(data);
+
+        // three.jsを初期化
         initialize_threejs(elm_id);
 
         // 基本要素を追加
@@ -41,6 +47,22 @@ function scatter_3d(canvas_id, data){
 
         // アニメーション開始
         animate();
+    }
+
+
+    // データを初期分析
+    function initialize_data(data){
+        // 全座標のmin/maxを取得
+        data_summary['x_min'] = Math.min(...data.map(d => d[0]));
+        data_summary['y_min'] = Math.min(...data.map(d => d[1]));
+        data_summary['z_min'] = Math.min(...data.map(d => d[2]));
+        data_summary['x_max'] = Math.max(...data.map(d => d[0]));
+        data_summary['y_max'] = Math.max(...data.map(d => d[1]));
+        data_summary['z_max'] = Math.max(...data.map(d => d[2]));
+        data_summary['min'] = Math.min(data_summary['x_min'], data_summary['y_min'], data_summary['z_min']);
+        data_summary['max'] = Math.max(data_summary['x_max'], data_summary['y_max'], data_summary['z_max']);
+
+        console.log(data_summary);
     }
 
 
@@ -191,3 +213,114 @@ function scatter_3d(canvas_id, data){
     // 処理開始
     main(canvas_id, data);
 }
+
+
+
+// min～maxを適切な具合に分ける目盛りを得る
+// https://www.eng.niigata-u.ac.jp/~nomoto/21.html
+function get_div_notch(min, max){
+    // sep_num分割したときの幅を返す
+    function get_notch_width(range, sep_num){
+        //console.log('get_notch_width('+range+','+sep_num+')');
+        // 厳密な分割幅
+        let notch_width_explict = range / sep_num;
+        //console.log('notch_width_explict:'+notch_width_explict);
+        let log_nwe = Math.log10(notch_width_explict);
+        //console.log('log_nwe:'+log_nwe);
+        let order = Math.floor(log_nwe);
+        //console.log('order:'+order);
+        // 最終的な分割幅になる候補のlog値
+        const candidates = [
+            Math.log10(5) + order - 1,
+                            order,      // log10(1)
+            Math.log10(2) + order,
+            Math.log10(5) + order,
+                            order + 1   // log10(1)
+        ];
+        // 差
+        const diffs = candidates.map(num => {
+            return Math.abs(num - log_nwe);
+        });
+        //console.log(diffs);
+        // 差の最小値
+        const min_diff = Math.min(...diffs);
+        // 分割幅（logとかやるから誤差が生じる）
+        const notch_width = Math.round(10**candidates[diffs.indexOf(min_diff)]);
+        // 結果
+        //console.log('return(notch_width): '+notch_width);
+        return notch_width;
+    }
+
+    // 軸の分割幅を決める
+    let range = max - min;
+    // 5～10分割してみて、(1 or 2 or 5)*(10**n)に丸めて、改めてそれで分割して、8分割に近い幅を採用する
+    let best_sep_num = 0;
+    let best_notch_width = 0;
+    let best_sep_i = -1;
+    //console.log('range:'+range);
+    for(let i=5; i<=10; i++){
+        //console.log('-------- looooooooooop -------' + i);
+        // i分割してみる
+        const cur_notch_width = get_notch_width(range, i);
+        //console.log('cur_notch_width:'+cur_notch_width);
+        const axis_min = min - min % cur_notch_width;
+        const axis_max = max - max % cur_notch_width
+            + (((max % cur_notch_width)==0)?0:cur_notch_width);
+        //console.log('axis_min/max: '+axis_min+'/'+axis_max);
+        const axis_width = axis_max - axis_min;
+        const cur_sep_num = axis_width / cur_notch_width;
+
+        if ((best_sep_i<0) || (Math.abs(8-cur_sep_num)<Math.abs(8-best_sep_num))){
+            //console.log('-----------------');
+            //console.log(axis_min);
+            //console.log(axis_max);
+            //console.log(cur_sep_num);
+            //console.log(cur_notch_width);
+            best_sep_i = i;
+            best_sep_num = cur_sep_num;
+            best_notch_width = cur_notch_width;
+        }
+    }
+    //console.log('===========');
+    //console.log('i: '+best_sep_i);
+    //console.log('notch_width:' + best_notch_width);
+
+    return best_notch_width;
+}
+
+
+// https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Math/floor
+/**
+ * Decimal adjustment of a number.
+ *
+ * @param {String}  type  The type of adjustment.
+ * @param {Number}  value The number.
+ * @param {Integer} exp   The exponent (the 10 logarithm of the adjustment base).
+ * @returns {Number} The adjusted value.
+ */
+ function decimalAdjust(type, value, exp) {
+    // If the exp is undefined or zero...
+    if (typeof exp === 'undefined' || +exp === 0) {
+      return Math[type](value);
+    }
+    value = +value;
+    exp = +exp;
+    // If the value is not a number or the exp is not an integer...
+    if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+      return NaN;
+    }
+    // Shift
+    value = value.toString().split('e');
+    value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+    // Shift back
+    value = value.toString().split('e');
+    return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+  }
+  
+  // Decimal round
+  const round10 = (value, exp) => decimalAdjust('round', value, exp);
+  // Decimal floor
+  const floor10 = (value, exp) => decimalAdjust('floor', value, exp);
+  // Decimal ceil
+  const ceil10 = (value, exp) => decimalAdjust('ceil', value, exp);
+  
