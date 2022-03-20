@@ -18,7 +18,7 @@ function scatter_3d(canvas_id, data){
 
     // 位置計算用の変数
     const box_size = 100;
-    const box_padding = 10;
+    const box_padding = 5;
     var pos_psi = (1/6) * Math.PI;
     var pos_theta = 0.25 * Math.PI;
     var target_psi = pos_psi;
@@ -141,7 +141,7 @@ function scatter_3d(canvas_id, data){
             transparent: true,  // 透過
             opacity: 0.2
         } );
-        let line_over_len = 2;
+        const line_over_len = 2;
         // グラフの座標値をthree.js内の座標値へ変換
         function val_to_pos(v){
             let v_width = data_summary['max'] - data_summary['min'];
@@ -195,6 +195,176 @@ function scatter_3d(canvas_id, data){
         });
         const line = new THREE.Line(line_geo, axis_mat);
         scene.add(line);
+
+        // 文字用のcanvasを作る
+        // https://astatsuya.medium.com/three-js%E3%81%A7%E5%B8%B8%E3%81%AB%E6%AD%A3%E9%9D%A2%E3%82%92%E5%90%91%E3%81%8F%E9%95%B7%E6%96%B9%E5%BD%A2%E3%81%AE%E6%96%87%E5%AD%97%E3%83%A9%E3%83%99%E3%83%AB%E3%82%92%E6%8F%8F%E7%94%BB%E3%81%99%E3%82%8B-fa606ed6752
+        /* del
+        const createSprite = (texture, scale, position) => {
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            let plane_xy = new THREE.Mesh( plane_geo_xy, plane_mat );
+            sprite.scale.set(scale.x, scale.y, scale.z);
+            sprite.position.set(position.x, position.y, position.z);
+            scene.add(sprite);
+        };
+        */
+        
+        /*
+        // canvasを作る
+        function create_canvas_for_texure1(canvasWidth, canvasHeight, text, fontSize){
+            const canvasForText = document.createElement("canvas");
+            const ctx = canvasForText.getContext("2d");
+            ctx.canvas.width = canvasWidth;
+            ctx.canvas.height = canvasHeight;
+            ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';                     // for debug
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);    // for debug
+            ctx.fillStyle = "rgb(51, 51, 51)";
+            ctx.font = fontSize+"px serif";
+            ctx.fillText(
+                text,
+                (canvasWidth - ctx.measureText(text).width) / 2,
+                canvasHeight / 2 + ctx.measureText(text).actualBoundingBoxAscent / 2
+            );
+            return canvasForText;
+        }
+        function create_label_plane(texture, position, size){
+            const mat = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.DoubleSide, // 裏も見える
+                transparent: true,      // 透過
+                opacity: 1,
+                depthTest: false        // 陰面処理
+            });
+            const plane_geo = new THREE.PlaneGeometry(size.width, size.height, 1, 1);
+            let plane = new THREE.Mesh( plane_geo, mat );
+            plane.position.set(position.x, position.y, position.z);
+            return plane
+        }
+
+        // test
+        const pln_text_height = box_size_p;
+        const pln_text_width = box_size_p/4;
+        const canvas_texture = new THREE.CanvasTexture(
+            create_canvas_for_texure1(200, 50, "HelloWorld", 50)
+        );
+        const pln_text = create_label_plane(
+            canvas_texture,
+            {x:0, y:box_size_p_h+pln_text_width/2, z:-box_size_p_h},
+            {width:pln_text_width, height:pln_text_height}
+        );
+        pln_text.rotation.z += Math.PI/2;
+        scene.add(pln_text);
+        */
+        
+        // Canvasにtextsを描いて返す
+        function create_canvas_for_texture(
+            texts, canvas_width, canvas_height, padding, align="right", reverse=false
+        ){
+            // textsのposをcanvas内の座標値に変換
+            function three2canvas(t_value, box_height, cvs_height){
+                // boxの中心(box=0)とcanvasの中心(canvas=cvs_h/2)は一致している前提
+                return (cvs_height/(box_height+padding*2))*t_value + cvs_height/2;
+            }
+
+            // canvas
+            const canvas_for_text = document.createElement("canvas");
+            const ctx = canvas_for_text.getContext("2d");
+            ctx.canvas.width = canvas_width;
+            ctx.canvas.height = canvas_height;
+            //ctx.fillStyle = 'rgba(255,0,0, 0.5)';                     // for debug
+            //ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);    // for debug
+
+            // 文字を描く
+            // 定義
+            ctx.fillStyle = "rgb(51, 51, 51)";
+            const font_size = Math.floor(canvas_height/20); // 1/10よりは小さく
+            const text_padding = font_size/2;   // フォントサイズ(高さ)の半分くらい
+            ctx.font = font_size+"px serif";
+            ctx.textAlign = align;
+            let text_pos = (align=="left") ? text_padding: canvas_width - text_padding;
+            ctx.textBaseline = "middle";
+            // 書く
+            for(let i=0; i<texts.length; i++){
+                let cur_text = (reverse)?texts[texts.length-i-1].text:texts[i].text;
+                let cur_pos = texts[i].pos;
+                ctx.fillText(
+                    cur_text,
+                    text_pos,
+                    three2canvas(cur_pos, box_size, canvas_height)
+                );
+            }
+            return canvas_for_text;
+        }
+        // TextureをMeshにして返す
+        function create_label_plane(texture, size){
+            const mat = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.DoubleSide, // 裏も見える
+                transparent: true,      // 透過
+                opacity: 1,
+                depthTest: false        // 陰面処理
+            });
+            const plane_geo = new THREE.PlaneGeometry(size.width, size.height, 1, 1);
+            let plane = new THREE.Mesh( plane_geo, mat );
+            return plane
+        }
+        // 数値軸の文字
+        let axis_texts = [];
+        for(let i=data_summary['min']; i<=data_summary['max']; i+=data_summary['axis_notch']){
+            axis_texts.push({text:i, pos:val_to_pos(i)});
+        }
+        // plateのサイズ
+        const axis_plate_width = box_size_p/4, axis_plate_heiht = box_size_p;
+        // canvasを作成
+        const canvas_size_rate = 5;     // 大きめに作らないと字がぼやける
+        const cvs_axis_left = create_canvas_for_texture(
+            axis_texts,
+            axis_plate_width*canvas_size_rate, axis_plate_heiht*canvas_size_rate,
+            box_padding,
+            "left"
+        );
+        const cvs_axis_right = create_canvas_for_texture(
+            axis_texts,
+            axis_plate_width*canvas_size_rate, axis_plate_heiht*canvas_size_rate,
+            box_padding,
+            "right"
+        );
+        const cvs_axis_right_reverse = create_canvas_for_texture(
+            axis_texts,
+            axis_plate_width*canvas_size_rate, axis_plate_heiht*canvas_size_rate,
+            box_padding,
+            "right",
+            true
+        );
+        // textureを作成
+        const canvas_texture_l = new THREE.CanvasTexture(cvs_axis_left);
+        const canvas_texture_r = new THREE.CanvasTexture(cvs_axis_right);
+        const canvas_texture_rr = new THREE.CanvasTexture(cvs_axis_right_reverse);
+        // x軸のplaneを作成
+        const pln_text_x = create_label_plane(
+            canvas_texture_l,
+            {width:axis_plate_width, height:axis_plate_heiht}
+        );
+        pln_text_x.position.set(0, box_size_p_h+axis_plate_width/2, -box_size_p_h);
+        pln_text_x.rotation.z += Math.PI/2;
+        scene.add(pln_text_x);
+        // y軸のplaneを作成
+        const pln_text_y = create_label_plane(
+            canvas_texture_r,
+            {width:axis_plate_width, height:axis_plate_heiht}
+        );
+        pln_text_y.rotation.z += Math.PI;
+        pln_text_y.position.set(box_size_p_h+axis_plate_width/2,0,-box_size_p_h);
+        scene.add(pln_text_y);
+        // z軸のplaneを作成
+        const pln_text_z = create_label_plane(
+            canvas_texture_rr,
+            {width:axis_plate_width, height:axis_plate_heiht}
+        );
+        pln_text_z.rotation.x += Math.PI/2;
+        pln_text_z.rotation.y += Math.PI;
+        pln_text_z.position.set(box_size_p_h+axis_plate_width/2,-box_size_p_h,0);
+        scene.add(pln_text_z);
 
         // 軸    
         const axis = new THREE.AxesHelper(box_size/2);
