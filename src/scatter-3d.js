@@ -106,16 +106,17 @@ function scatter_3d(canvas_id, data){
     }
 
 
+    // グラフの座標値をthree.js内の座標値へ変換
+    const val_to_pos = (v, graph_min, graph_max) => {
+        return (box_size/(graph_max-graph_min))*(v-graph_min) - box_size/2;
+    }
+    
     // 基本要素を追加
     function add_basic_elements(){
         // padding込みのサイズ
         const box_size_p = box_size + box_padding*2;
         const box_size_p_h = box_size_p/2;  // half
 
-        // グラフの座標値をthree.js内の座標値へ変換
-        const val_to_pos = (v, graph_min, graph_max) => {
-            return (box_size/(graph_max-graph_min))*(v-graph_min) - box_size/2;
-        }
         // 背景面
         {
             let plane_geo_xy = new THREE.PlaneGeometry(box_size_p, box_size_p, 1, 1);
@@ -321,13 +322,15 @@ function scatter_3d(canvas_id, data){
 
     // 要素を追加
     function add_elements(data){
-        // box
+        // box for debug
         let geo1 = new THREE.BoxGeometry(box_size/10, box_size/10, box_size/10);  // x-width, y-width, z-width
         let material_basic = new THREE.MeshLambertMaterial( { color: 0x00aa00 } );
         box = new THREE.Mesh( geo1, material_basic );
         box.position.set(box_size/20, box_size/20, box_size/20);
         scene.add( box );
         elms.push( box );
+
+        
     }
 
 
