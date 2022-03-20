@@ -44,7 +44,7 @@ function scatter_3d(canvas_id, data){
         add_elements(data);
 
         // ドラッグイベントリスナー登録
-        regist_drag_event(elm_id);
+        regist_drag_event();
 
         // アニメーション開始
         animate();
@@ -66,7 +66,7 @@ function scatter_3d(canvas_id, data){
         let notch = get_div_notch(data_summary['min'], data_summary['max']);
         data_summary['axis_notch'] = notch;
 
-        console.log(data_summary);
+        //console.log(data_summary);
     }
 
 
@@ -363,23 +363,42 @@ function scatter_3d(canvas_id, data){
     }
 
 
-    // ドラッグイベント
+    // cvsに対するドラッグイベント
     function regist_drag_event(){
+        cvs.addEventListener("contextmenu", (e) => e.preventDefault());
         cvs.onmousedown = function(event){
             let start_x = event.offsetX;
             let start_y = event.offsetY;
 
             let start_pos_theta = pos_theta;
             let start_pos_psi = pos_psi;
+            let start_log_zoom = Math.log(camera.zoom);
+
+            // ボタン[0:左, 1:右]
+            let event_button = event.button;
+            if( (event_button!=0) && (event_button!=2) ) {
+                return;
+            }
 
             // 移動処理
-            function moveTo(pos_x, pos_y){
+            const moveTo = (pos_x, pos_y) => {
                 let diff_x = start_x - pos_x;
                 target_theta = start_pos_theta + diff_x*0.005;
 
                 let diff_y = pos_y - start_y;
                 target_psi = start_pos_psi + diff_y*0.005;
-            }
+                return;
+            };
+
+            // 拡大縮小
+            const resizeTo = (pos_x, pos_y) => {
+                // xは右、yは上で拡大
+                let target_log_zoom = start_log_zoom
+                    + ( - start_x + start_y + pos_x - pos_y)*0.005;
+                camera.zoom = Math.exp(target_log_zoom);
+                camera.updateProjectionMatrix();
+                return;
+            }            
 
             // ドラッグ中の移動
             function onMouseMove(event){
@@ -390,7 +409,11 @@ function scatter_3d(canvas_id, data){
                     endDragging();
                     return;
                 }
-                moveTo(event.offsetX, event.offsetY);
+                if( event_button==0 ){
+                    moveTo(event.offsetX, event.offsetY);
+                }else if( event_button==2 ){
+                    resizeTo(event.offsetX, event.offsetY);
+                }
             }
 
             // ドラッグ終了
