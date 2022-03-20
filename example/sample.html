@@ -39,6 +39,21 @@
 </head>
 
 <body>
+	<input type="button" onclick="
+		document.getElementById('area_input').value
+			= (data1.map((rec)=>rec.join(','))).join('\n');
+	" value="sample data1" />
+	<input type="button" onclick="
+		document.getElementById('area_input').value
+			= (data2.map((rec)=>rec.join(','))).join('\n');
+	" value="sample data2" />
+	<input type="button" onclick="document.getElementById('area_input').value='';" value="clear" /><br />
+	<textarea id="area_input" style="width:40em; height:5em;"></textarea>
+	<input type="button" value="表示" onclick="
+		scatter_3d('cvs_scatter1',
+		document.getElementById('area_input').value.split('\n').map(function(rec){return rec.split(',');}));
+	"/>
+	<hr />
 	<canvas id="cvs_scatter1" width="640" height="480"></canvas><br />
 </body>
 </html>
