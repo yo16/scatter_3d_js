@@ -71,7 +71,7 @@ function scatter_3d(canvas_id, data){
 
 
     // Three.js 初期化
-    function initialize_threejs(elm_id){
+    function initialize_threejs(){
         // シーン
         scene = new THREE.Scene();
         scene.background = new THREE.Color( 0xffffff );
@@ -102,7 +102,6 @@ function scatter_3d(canvas_id, data){
         });
         renderer.setSize( cvs_rect.width, cvs_rect.height );
         renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild( renderer.domElement );
     }
 
 
