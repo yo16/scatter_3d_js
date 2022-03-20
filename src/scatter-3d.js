@@ -107,10 +107,10 @@ function scatter_3d(canvas_id, data){
 
 
     // グラフの座標値をthree.js内の座標値へ変換
-    const val_to_pos = (v, graph_min, graph_max) => {
+    const val_to_pos = (v, graph_min=data_summary['min'], graph_max=data_summary['max']) => {
         return (box_size/(graph_max-graph_min))*(v-graph_min) - box_size/2;
     }
-    
+
     // 基本要素を追加
     function add_basic_elements(){
         // padding込みのサイズ
@@ -149,7 +149,7 @@ function scatter_3d(canvas_id, data){
             } );
             const line_over_len = 2;
             for(let i=data_summary['min']; i<=data_summary['max']; i+=data_summary['axis_notch']){
-                const vtp_i = val_to_pos(i, data_summary['min'], data_summary['max']);
+                const vtp_i = val_to_pos(i);
                 // xy->yz
                 const p1 = [
                     new THREE.Vector3( box_size_p_h+line_over_len, vtp_i, -box_size_p_h),
@@ -199,6 +199,10 @@ function scatter_3d(canvas_id, data){
 
         // 軸の数字
         {
+            // plateのサイズ
+            const axis_plate_width = box_size_p;
+            const axis_plate_heiht = box_size_p;
+
             // 文字用のcanvasを作る
             // 参考
             // https://astatsuya.medium.com/three-js%E3%81%A7%E5%B8%B8%E3%81%AB%E6%AD%A3%E9%9D%A2%E3%82%92%E5%90%91%E3%81%8F%E9%95%B7%E6%96%B9%E5%BD%A2%E3%81%AE%E6%96%87%E5%AD%97%E3%83%A9%E3%83%99%E3%83%AB%E3%82%92%E6%8F%8F%E7%94%BB%E3%81%99%E3%82%8B-fa606ed6752
@@ -258,10 +262,8 @@ function scatter_3d(canvas_id, data){
             // 数値軸の文字
             let axis_texts = [];
             for(let i=data_summary['min']; i<=data_summary['max']; i+=data_summary['axis_notch']){
-                axis_texts.push({text:i, pos:val_to_pos(i, data_summary['min'], data_summary['max'])});
+                axis_texts.push({text:i, pos:val_to_pos(i)});
             }
-            // plateのサイズ
-            const axis_plate_width = box_size_p/4, axis_plate_heiht = box_size_p;
             // canvasを作成
             const canvas_size_rate = 5;     // 大きめに作らないと字がぼやける
             const cvs_axis_left = create_canvas_for_texture(
@@ -322,6 +324,7 @@ function scatter_3d(canvas_id, data){
 
     // 要素を追加
     function add_elements(data){
+        /*
         // box for debug
         let geo1 = new THREE.BoxGeometry(box_size/10, box_size/10, box_size/10);  // x-width, y-width, z-width
         let material_basic = new THREE.MeshLambertMaterial( { color: 0x00aa00 } );
@@ -329,8 +332,25 @@ function scatter_3d(canvas_id, data){
         box.position.set(box_size/20, box_size/20, box_size/20);
         scene.add( box );
         elms.push( box );
+        */
 
-        
+        const dot_mat = new THREE.MeshLambertMaterial( {
+            color: 0x333366,
+            transparent: true,      // 透過
+            opacity: 0.8,
+            depthTest: false        // 陰面処理
+        } );
+        const dot_size = box_size/100;
+        for(let i=0; i<data.length; i++){
+            const dot_geo = new THREE.BoxGeometry(dot_size, dot_size, dot_size);
+            const dot_cube = new THREE.Mesh(dot_geo, dot_mat);
+            dot_cube.position.set(
+                val_to_pos(data[i][0]),
+                val_to_pos(data[i][1]),
+                val_to_pos(data[i][2])
+            );
+            scene.add(dot_cube);
+        }
     }
 
 
