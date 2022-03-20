@@ -316,9 +316,9 @@ function scatter_3d(canvas_id, data){
             scene.add(pln_text_z);
         }
 
-        // 軸    
-        const axis = new THREE.AxesHelper(box_size/2);
-        scene.add(axis);
+        // 軸 for debug
+        //const axis = new THREE.AxesHelper(box_size/2);
+        //scene.add(axis);
     }
 
 
