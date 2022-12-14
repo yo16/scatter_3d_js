@@ -1,101 +1,59 @@
 <!DOCTYPE html>
 
-<html lang="ja">
+<html>
 <head>
 	<meta charset="utf-8" >
-	<title>get_div_notchのテスト</title>
+	<title>scatter-3d</title>
 	<script type="text/javascript" src="./three.min.js"></script>
 	<script type="text/javascript" src="./scatter-3d.js"></script>
-	<script type="text/javascript" src="./d3.v7.3.0.min.js"></script>
-	<script type="text/javascript" src="./number_line_maker.js"></script>
-	<!-- script type="text/javascript" src="./docs/js/lib/three.min.js"></script>
-	<script type="text/javascript" src="./src/scatter-3d.js"></script>
-	<script type="text/javascript" src="./docs/js/lib/d3.v7.3.0.min.js"></script>
-	<script type="text/javascript" src="./docs/js/number_line_maker.js"></script -->
 	<script type="text/javascript">
+
+	// 適当にデータを生成
+	let data1 = [];
+	let theta=0; z=-10.0, r=10;
+	for( let i=0; z<10; i++){
+		data1.push([r*Math.cos(theta), r*Math.sin(theta), z]);
+		theta += Math.PI*0.01;
+		z += 0.02;
+	}
+	console.log("num of data1: "+data1.length);
+
+	let data2 = [];
+	let pi = 0;
+	for( theta=0; theta<Math.PI*2; theta+=Math.PI/36){
+		for( pi=0; pi<Math.PI*2; pi+=Math.PI/20){
+			data2.push([
+				(4+2*Math.cos(pi)) * Math.cos(theta),
+				(6+2*Math.cos(pi)) * Math.sin(theta),
+				2*Math.sin(pi)
+			]);
+		}
+	}
+	console.log("num of data2: "+data2.length);
+
 	document.addEventListener("DOMContentLoaded", function(event){
-		let min=null, max=null, ypos=0, notch=null;
-
-		min=0, max=10, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=0, max=11, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=0, max=12, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=0, max=13, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=0, max=16, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=0, max=18, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=0, max=20, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=0, max=22, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=-10, max=10, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=-10, max=10, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=-11, max=11, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=-11, max=0, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, 0, 300, 20, ypos);
-
-		min=-11, max=-0.1, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, -5, 300, 20, ypos);
-
-		min=-11, max=-2, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, -5, 300, 20, ypos);
-
-		min=-11, max=-1.9, ypos+=50;
-		notch = get_div_notch(min, max);
-		console.log(notch);
-		draw_number_line("#line_number", notch, min, max, -5, 300, 20, ypos);
-
+		// 描画
+		scatter_3d("cvs_scatter1", data1);
 	});
 	</script>
 </head>
 
 <body>
-	<div id="line_number" width="400" height="1000" />
+	<input type="button" onclick="
+		document.getElementById('area_input').value
+			= (data1.map((rec)=>rec.join(','))).join('\n');
+	" value="sample data1" />
+	<input type="button" onclick="
+		document.getElementById('area_input').value
+			= (data2.map((rec)=>rec.join(','))).join('\n');
+	" value="sample data2" />
+	<input type="button" onclick="document.getElementById('area_input').value='';" value="clear" /><br />
+	<textarea id="area_input" style="width:40em; height:5em;"></textarea>
+	<input type="button" value="表示" onclick="
+		scatter_3d('cvs_scatter1',
+		document.getElementById('area_input').value.split('\n').map(function(rec){return rec.split(',');}));
+	"/>
+	<hr />
+	<canvas id="cvs_scatter1" width="640" height="480"></canvas><br />
 </body>
 </html>
