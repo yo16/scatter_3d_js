@@ -6,7 +6,7 @@
 （/example/sample.htmlで動きます）
 
 # デモサイト
-https://yo16-scatter-3d.herokuapp.com/
+https://yo16.github.io/scatter_3d_js/
 
 # Qiitaの記事
 https://qiita.com/yo16/items/b5af6d2e9d1bf5e8ab51
